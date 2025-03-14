@@ -1,7 +1,7 @@
 const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../utils/helpers').sequelize;
+const sequelize = require('../database/database').sequelize;
 
-class User extends Model {}
+class User extends Model { }
 
 User.init(
     {

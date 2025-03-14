@@ -1,13 +1,16 @@
 const express = require('express');
-const {umzug, sequelize} = require('./utils/helpers');
-const userRoutes = require('./routes/users');
+const { umzug, sequelize } = require('./database/database');
+const userRoutes = require('./modules/routes/users');
 const errorHandler = require('./middlewares/errorHandler');
-
+const cronService = require('./modules/services/cronService');
+const taskRoutes = require('./modules/routes/taskRoutes');
+const config = require('./config/server');
 const app = express();
-const port = 3000;
+const port = config.port;
 
 app.use(express.json());
 app.use('/users', userRoutes);
+app.use('/tasks', taskRoutes);
 app.use(errorHandler);
 
 async function start() {
@@ -17,6 +20,9 @@ async function start() {
 
         await umzug.up();
         console.log('Migrations have been executed successfully.');
+
+        await cronService.startCronJobs();
+        console.log('Cron jobs started.');
 
         app.listen(port, () => {
             console.log(`Server is running on port ${port}`);
