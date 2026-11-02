@@ -1,31 +1,38 @@
 {
-  "name": "balancer",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "balance-app",
+  "version": "2.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js",
-    "start": "node app.js"
+    "test": "node --test \"test/unit/**/*.test.js\"",
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "test:integration": "node --test --test-concurrency=1 \"test/integration/**/*.test.js\"",
+    "test:all": "npm test && npm run test:integration"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Guvanch D.",
+  "license": "MIT",
+  "description": "Correctness under concurrency: atomic balance updates in Postgres and a distributed cron with a safe Redis lock",
+  "type": "commonjs",
   "dependencies": {
-    "cron": "^4.1.0",
-    "express": "^4.21.2",
-    "express-validation": "^4.1.1",
-    "express-validator": "^7.2.1",
-    "node-fetch": "^2.7.0",
-    "pg": "^8.13.3",
-    "pg-hstore": "^2.3.4",
-    "redis": "^4.7.0",
-    "sequelize": "^6.37.6",
-    "umzug": "^3.8.2",
-    "uuid": "^11.1.0"
+    "cron": "^4.4.0",
+    "express": "^5.3.0",
+    "ioredis": "^5.11.1",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
-    "dotenv": "^16.4.7",
-    "nodemon": "^3.1.7"
-  }
+    "@electric-sql/pglite": "^0.5.14",
+    "ioredis-mock": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=22.9"
+  },
+  "private": true,
+  "keywords": [
+    "concurrency",
+    "postgresql",
+    "redis",
+    "distributed-lock",
+    "cron",
+    "express",
+    "nodejs"
+  ]
 }
