@@ -1,0 +1,65 @@
+# Two app instances share one Postgres and one Redis, so the distributed
+# scheduler has something to coordinate: watch `docker compose logs -f app-1 app-2`
+# and each task tick shows up on exactly one of them.
+#
+# Credentials below are local demo defaults, not secrets.
+
+x-app: &app
+  build: .
+  init: true
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  environment: &app-env
+    DATABASE_URL: postgres://balance:balance@postgres:5432/balance
+    REDIS_URL: redis://redis:6379
+    PORT: "3000"
+    LOCK_TTL_MS: "5000"
+    SEED_DEMO_DATA: "true"
+    SHUTDOWN_TIMEOUT_MS: "10000"
+  stop_grace_period: 20s
+
+services:
+  app-1:
+    <<: *app
+    environment:
+      <<: *app-env
+      SERVER_ID: app-1
+    ports:
+      - "3000:3000"
+
+  app-2:
+    <<: *app
+    environment:
+      <<: *app-env
+      SERVER_ID: app-2
+    ports:
+      - "3001:3000"
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: balance
+      POSTGRES_PASSWORD: balance
+      POSTGRES_DB: balance
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U balance -d balance"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
